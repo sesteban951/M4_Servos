@@ -5,17 +5,23 @@
 #include <Servo.h>
 
 // servo object
-Servo servo;
+Servo servo1;
+Servo servo2;
+Servo servo3;
+Servo servo4;
 
 // compute the sine wave positions
 double sin_value = 0.0; // variable to store the sine value
-double frequency = 2.0; // frequency of the sine wave
+double frequency = 1.0; // frequency of the sine wave
 int pos = 0;            // variable to store the servo position
 
 void setup()
 {
     // attach the servo
-    servo.attach(23); // attach the servo on pin 9 to the servo object
+    servo1.attach(14); 
+    servo2.attach(15); 
+    servo3.attach(18); 
+    servo4.attach(19); 
 
     // turn on LED to indicate ON
     pinMode(LED_BUILTIN, OUTPUT);
@@ -25,12 +31,13 @@ void setup()
 void loop()
 {
     // calculate the sine value
-    sin_value = sin(frequency * millis() / 1000.0); // calculate sine value based on time
+    sin_value = sin(2 * 3.14159  * frequency * millis() / 1000.0); // calculate sine value based on time
     pos = map(sin_value, -1, 1, 0, 180); // map the sine value to servo position (0 to 180 degrees)
 
     // write the position to the servo
-    servo.write(pos);
-
-    // wait for a short period to create a smooth motion
-    // delay(10);   
+    servo1.write(pos);
+    servo2.write(pos);
+    servo3.write(pos);
+    servo4.write(pos);
 }
+

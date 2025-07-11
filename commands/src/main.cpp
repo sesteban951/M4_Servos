@@ -7,13 +7,11 @@
 #include <unistd.h>
 #include <iostream>
 
-// for debugging
-#include <chrono>
-
 // main function
 int main() {
 
     // open serial port
+    // Replace with your Teensy's port (e.g., 'COM3' on Windows or '/dev/ttyACM0' on Linux)
     // NOTE: use "ls /dev/ttyACM*" to find the correct port
     int serial_port = open("/dev/ttyACM0", O_RDWR);
     if (serial_port < 0) {

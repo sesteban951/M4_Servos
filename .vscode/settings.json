@@ -1,0 +1,6 @@
+{
+    "cmake.sourceDirectory": "/home/sergio/projects/M4_Servos/commands",
+    "files.associations": {
+        "iostream": "cpp"
+    }
+}

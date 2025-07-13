@@ -31,12 +31,24 @@ Servo servo2;
 Servo servo3;
 Servo servo4;
 
-// servo ocontrol parameters
-int armed = 0;              // armed state, 0 = not armed, 1 = armed
-const double deg_pos_0 = 45.0;  // [deg] position when "OFF" (0)
-const double deg_pos_1 = 90.0;  // [deg] position when "ON" (1)
-const double pwm_pos_0 = 800.0;   // [us] position when "OFF" (0)
-const double pwm_pos_1 = 2200.0;  // [us] position when "ON" (1)
+// command variables
+int command_prev = 0;         // previous command received
+int command_curr = 0;         // current command received 
+bool command_change = false;  // flag to indicate if command changed
+
+// position variables
+bool armed = false;                // current state of the servos
+const double deg_pos_0 = 30.0;     // [deg] position when "OFF" (0)
+const double deg_pos_1 = 90.0;     // [deg] position when "ON" (1)
+double interp_start_deg, interp_end_deg;  // interpolation start and end positions
+
+// interpolation variables
+const double T_interp = 250.0;  // [ms] time to ramp from one position to another
+double t_start, t_now;
+double alpha, deg_pos;
+
+// LED indicator
+bool LED_STATE = false;
 
 void setup()
 {
@@ -51,50 +63,121 @@ void setup()
 
     // builtinLED to indicate status
     pinMode(LED_BUILTIN, OUTPUT);
+
+    // servos go to initial position
+    servo1.write(deg_pos_0);
+    servo2.write(deg_pos_0);
+    servo3.write(deg_pos_0);
+    servo4.write(deg_pos_0);
 }
 
 void loop()
 {
     // check if there is data available on the serial port
-    if (Serial.available()) {
+    if (Serial.available()) {       
         
         // read the command from serial
         char cmd = Serial.read();
-        armed = (cmd == '1') ? 1 : 0;
+        
+        // set the current command
+        if (cmd == '0') {
+            command_curr = 0;  // unarm command
+        } 
+        else if (cmd == '1') {
+            command_curr = 1;  // arm command
+        } 
+        else {
+            // really bad, detach the servos. TODO: this is not working
+            command_curr = -1;
+            servo1.detach();
+            servo2.detach();
+            servo3.detach();
+            servo4.detach();
+            // pinMode(SERVO1_PIN, INPUT);
+            // pinMode(SERVO2_PIN, INPUT);
+            // pinMode(SERVO3_PIN, INPUT);
+            // pinMode(SERVO4_PIN, INPUT);
+        }
+    }
 
-        // check the command and control the servos
-        if (armed == 0) {
+    // see if there has been an command change
+    if (command_curr != command_prev) {
 
-            // set LED indicator to OFF when disarmed
+        // set flag 
+        command_change = true;
+        command_prev = command_curr;
+
+        // record start time
+        t_start = millis();
+
+        // set interpolation targets
+        if (command_curr == 0) {
+            interp_start_deg = deg_pos_1;
+            interp_end_deg = deg_pos_0;
+        } 
+        else if (command_curr == 1) {
+            interp_start_deg = deg_pos_0;
+            interp_end_deg = deg_pos_1;
+        }
+    } 
+    
+    // interpolate to new desired state
+    if (command_change == true) {
+        
+        // get current time
+        t_start = millis();
+
+        // interpolate positions
+        while (millis() - t_start < T_interp) {
+            
+            // compute interpolation factor
+            t_now = millis() - t_start;
+            alpha = t_now / T_interp;
+            
+            // interpolate position
+            deg_pos = (1.0 - alpha) * interp_start_deg + alpha * interp_end_deg;
+            
+            // write the position to the servo
+            servo1.write(deg_pos);
+            servo2.write(deg_pos);
+            servo3.write(deg_pos);
+            servo4.write(deg_pos);
+            
+            // set LED indicator to ON when command
+            LED_STATE = !LED_STATE;
+            digitalWrite(LED_BUILTIN, LED_STATE);
+            
+            // delay just because
+            delay(50);
+        }
+
+        // reset command change flag
+        command_change = false;
+    }
+    
+    // no new command, keep previous command
+    else {
+        if (command_curr == 0) {
+            // set LED indicator to OFF when discommand
+            LED_STATE = true;
             digitalWrite(LED_BUILTIN, LOW);
             
             // write the position to the servo
-            // servo1.write(deg_pos_0);
-            // servo2.write(deg_pos_0);
-            // servo3.write(deg_pos_0);
-            // servo4.write(deg_pos_0);
-            servo1.writeMicroseconds(pwm_pos_0);
-            servo2.writeMicroseconds(pwm_pos_0);
-            servo3.writeMicroseconds(pwm_pos_0);
-            servo4.writeMicroseconds(pwm_pos_0);
+            servo1.write(deg_pos_0);
+            servo2.write(deg_pos_0);
+            servo3.write(deg_pos_0);
+            servo4.write(deg_pos_0);
         } 
-        else if (armed == 1) {
-
-            // set LED indicator to ON when armed
-            digitalWrite(LED_BUILTIN, HIGH);
+        else if (command_curr == 1) {
+            // set LED indicator to ON when command
+            LED_STATE = true;
+            digitalWrite(LED_BUILTIN, LED_STATE);
             
             // write the position to the servo
-            // servo1.write(deg_pos_1);
-            // servo2.write(deg_pos_1);
-            // servo3.write(deg_pos_1);
-            // servo4.write(deg_pos_1);
-            servo1.writeMicroseconds(pwm_pos_1);
-            servo2.writeMicroseconds(pwm_pos_1);
-            servo3.writeMicroseconds(pwm_pos_1);
-            servo4.writeMicroseconds(pwm_pos_1);
-        }
-        else {
-            // unknown command, stay at previous state
+            servo1.write(deg_pos_1);
+            servo2.write(deg_pos_1);
+            servo3.write(deg_pos_1);
+            servo4.write(deg_pos_1);
         }
     }
 

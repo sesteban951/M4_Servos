@@ -45,14 +45,30 @@ int main() {
     // apply settings
     tcsetattr(teensy_serial_port, TCSANOW, &tty);
 
-    // beginning of communication loop
+    // // beginning of communication loop
+    // while (true) {
+    //     std::cout << "Enter 1 (ON), 0 (OFF), or q to quit: ";
+    //     std::string input;
+    //     std::cin >> input;
+    //     if (input == "q") break;
+    //     if (input == "1" || input == "0") {
+    //         write(teensy_serial_port, input.c_str(), 1);
+    //     }
+    // }
+
     while (true) {
-        std::cout << "Enter 1 (ON), 0 (OFF), or q to quit: ";
+        std::cout << "Enter servo position (00–99) or q to quit: ";
         std::string input;
         std::cin >> input;
+
         if (input == "q") break;
-        if (input == "1" || input == "0") {
-            write(teensy_serial_port, input.c_str(), 1);
+
+        if (input.length() == 1) input = "0" + input;  // pad with leading zero
+
+        if (input.length() == 2 && isdigit(input[0]) && isdigit(input[1])) {
+            write(teensy_serial_port, input.c_str(), 2);  // send 2 bytes
+        } else {
+            std::cerr << "Invalid input. Enter a number between 00 and 99.\n";
         }
     }
 

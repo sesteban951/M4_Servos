@@ -36,30 +36,35 @@ int command_prev = 0;         // previous command received
 int command_curr = 0;         // current command received 
 bool command_change = false;  // flag to indicate if command changed
 
-// position variables
-const double deg_pos_0 = 20.0;     // [deg] position when "OFF" (0)
-const double deg_pos_1 = 80.0;     // [deg] position when "ON" (1)
-double interp_start_deg, interp_end_deg;  // interpolation start and end positions
+// interpo start and position variables
+double interp_start_deg_servo1, interp_end_deg_servo1;
+double interp_start_deg_servo2, interp_end_deg_servo2;
+double interp_start_deg_servo3, interp_end_deg_servo3;
+double interp_start_deg_servo4, interp_end_deg_servo4;
 
 // interpolation variables
 const double T_interp = 50.0;  // [ms] time to ramp from one position to another
 double t_start, t_now;
-double alpha, deg_pos;
+double alpha;
+double deg_pos_servo1;
+double deg_pos_servo2;
+double deg_pos_servo3;
+double deg_pos_servo4;
 
 // LED indicator
 bool LED_STATE = false;
 
 // open positions for the servos
-double deg_pos_open_servo1 = 20.0;
-double deg_pos_open_servo2 = 35.0;
-double deg_pos_open_servo3 = 35.0;
-double deg_pos_open_servo4 = 40.0;
+const double deg_pos_open_servo1 = 20.0;
+const double deg_pos_open_servo2 = 35.0;
+const double deg_pos_open_servo3 = 35.0;
+const double deg_pos_open_servo4 = 40.0;
 
 // locked positions for the servos
-double deg_pos_lock_servo1 = 65.0;
-double deg_pos_lock_servo2 = 90.0;
-double deg_pos_lock_servo3 = 99.0;
-double deg_pos_lock_servo4 = 99.0;
+const double deg_pos_lock_servo1 = 65.0;
+const double deg_pos_lock_servo2 = 90.0;
+const double deg_pos_lock_servo3 = 99.0;
+const double deg_pos_lock_servo4 = 99.0;
 
 
 void setup()
@@ -109,9 +114,9 @@ void loop()
             // really bad, detach the servos. TODO: this is not working
             command_curr = -1;
             servo1.detach();
-            // servo2.detach();
-            // servo3.detach();
-            // servo4.detach();
+            servo2.detach();
+            servo3.detach();
+            servo4.detach();
             // pinMode(SERVO1_PIN, INPUT);
             // pinMode(SERVO2_PIN, INPUT);
             // pinMode(SERVO3_PIN, INPUT);
@@ -120,19 +125,46 @@ void loop()
     }
     // see if there has been an command change
     if (command_curr != command_prev) {
+        
         // set flag 
         command_change = true;
         command_prev = command_curr;
+        
         // record start time
         t_start = millis();
+        
         // set interpolation targets
         if (command_curr == 0) {
-            interp_start_deg = deg_pos_1;
-            interp_end_deg = deg_pos_0;
+            // interp_start_deg = deg_pos_1;
+            // interp_end_deg = deg_pos_0;
+
+            interp_start_deg_servo1 = deg_pos_lock_servo1;
+            interp_end_deg_servo1 = deg_pos_open_servo1;
+
+            interp_start_deg_servo2 = deg_pos_lock_servo2;
+            interp_end_deg_servo2 = deg_pos_open_servo2;
+
+            interp_start_deg_servo3 = deg_pos_lock_servo3;
+            interp_end_deg_servo3 = deg_pos_open_servo3;
+
+            interp_start_deg_servo4 = deg_pos_lock_servo4;
+            interp_end_deg_servo4 = deg_pos_open_servo4;
         } 
         else if (command_curr == 1) {
-            interp_start_deg = deg_pos_0;
-            interp_end_deg = deg_pos_1;
+            // interp_start_deg = deg_pos_0;
+            // interp_end_deg = deg_pos_1;
+
+            interp_start_deg_servo1 = deg_pos_open_servo1;
+            interp_end_deg_servo1 = deg_pos_lock_servo1;
+
+            interp_start_deg_servo2 = deg_pos_open_servo2;
+            interp_end_deg_servo2 = deg_pos_lock_servo2;
+
+            interp_start_deg_servo3 = deg_pos_open_servo3;
+            interp_end_deg_servo3 = deg_pos_lock_servo3;
+
+            interp_start_deg_servo4 = deg_pos_open_servo4;
+            interp_end_deg_servo4 = deg_pos_lock_servo4;
         }
     } 
 
@@ -141,6 +173,7 @@ void loop()
  
         // get current time
         t_start = millis();
+
         // interpolate positions
         while (millis() - t_start < T_interp) {
      
@@ -149,14 +182,20 @@ void loop()
             alpha = t_now / T_interp;
      
             // interpolate position
-            deg_pos = (1.0 - alpha) * interp_start_deg + alpha * interp_end_deg;
+            // deg_pos = (1.0 - alpha) * interp_start_deg + alpha * interp_end_deg;
+
+            deg_pos_servo1 = (1.0 - alpha) * interp_start_deg_servo1 + alpha * interp_end_deg_servo1;
+            deg_pos_servo2 = (1.0 - alpha) * interp_start_deg_servo2 + alpha * interp_end_deg_servo2;
+            deg_pos_servo3 = (1.0 - alpha) * interp_start_deg_servo3 + alpha * interp_end_deg_servo3;
+            deg_pos_servo4 = (1.0 - alpha) * interp_start_deg_servo4 + alpha * interp_end_deg_servo4;
      
             // write the position to the servo
-            servo1.write(deg_pos);
-            // servo2.write(deg_pos);
-            // servo3.write(deg_pos);
-            // servo4.write(deg_pos);
+            servo1.write(deg_pos_servo1);
+            servo2.write(deg_pos_servo2);
+            servo3.write(deg_pos_servo3);
+            servo4.write(deg_pos_servo4);
         }
+
         // reset command change flag
         command_change = false;
     }
@@ -169,10 +208,10 @@ void loop()
             digitalWrite(LED_BUILTIN, LOW);
      
             // write the position to the servo
-            servo1.write(deg_pos_0);
-            // servo2.write(deg_pos_0);
-            // servo3.write(deg_pos_0);
-            // servo4.write(deg_pos_0);
+            servo1.write(deg_pos_open_servo1);
+            servo2.write(deg_pos_open_servo2);
+            servo3.write(deg_pos_open_servo3);
+            servo4.write(deg_pos_open_servo4);
         } 
         else if (command_curr == 1) {
             // set LED indicator to ON when command
@@ -180,12 +219,13 @@ void loop()
             digitalWrite(LED_BUILTIN, LED_STATE);
      
             // write the position to the servo
-            servo1.write(deg_pos_1);
-            // servo2.write(deg_pos_1);
-            // servo3.write(deg_pos_1);
-            // servo4.write(deg_pos_1);
+            servo1.write(deg_pos_lock_servo1);
+            servo2.write(deg_pos_lock_servo2);
+            servo3.write(deg_pos_lock_servo3);
+            servo4.write(deg_pos_lock_servo4);
         }
     }
+    
     // delay to avoid flooding the serial port
     delay(10);
 }

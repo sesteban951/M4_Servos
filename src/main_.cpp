@@ -51,22 +51,26 @@ double alpha, deg_pos;
 bool LED_STATE = false;
 
 // global degree variable
+// double deg_pos_open_servo1 = 20.0;
+// double deg_pos_open_servo2 = 20.0;
+// double deg_pos_open_servo3 = 40.0;
+// double deg_pos_open_servo4 = 30.0;
 double deg_pos_open_servo1 = 20.0;
-double deg_pos_open_servo2 = 20.0;
-double deg_pos_open_servo3 = 40.0;
-double deg_pos_open_servo4 = 30.0;
+double deg_pos_open_servo2 = 35.0;
+double deg_pos_open_servo3 = 35.0;
+double deg_pos_open_servo4 = 40.0;
 
-double deg_pos_lock_servo1 = 60.0; // maybe 65
-double deg_pos_lock_servo2 = 75.0;
-double deg_pos_lock_servo3 = 95.0;
-double deg_pos_lock_servo4 = 75.0;
+double deg_pos_lock_servo1 = 65.0; // maybe 60
+double deg_pos_lock_servo2 = 90.0;
+double deg_pos_lock_servo3 = 99.0;
+double deg_pos_lock_servo4 = 99.0;
 
 // double deg_pos_lock_servo1 = 50.0; // maybe 65
 // double deg_pos_lock_servo2 = 65.0;
 // double deg_pos_lock_servo3 = 85.0;
 // double deg_pos_lock_servo4 = 65.0;
 
-double deg_pos_des = 30.0;
+double deg_pos_des = 40.0;
 
 void setup()
 {
@@ -103,28 +107,28 @@ void setup()
 
 void loop()
 {
-    // if (Serial.available() >= 2) {
-    // char high = Serial.read();
-    // char low = Serial.read();
+    if (Serial.available() >= 2) {
+    char high = Serial.read();
+    char low = Serial.read();
 
-    //     if (isdigit(high) && isdigit(low)) {
-    //         int value = (high - '0') * 10 + (low - '0');
-    //         Serial.print("Received value: ");
-    //         Serial.println(value);
+        if (isdigit(high) && isdigit(low)) {
+            int value = (high - '0') * 10 + (low - '0');
+            Serial.print("Received value: ");
+            Serial.println(value);
 
-    //         // staurate the value to 20 and 80 degrees
-    //         if (value < 10) {
-    //             value = 10;
-    //         } else if (value > 99) {
-    //             value = 99;
-    //         }
+            // staurate the value to 20 and 80 degrees
+            if (value < 10) {
+                value = 10;
+            } else if (value > 99) {
+                value = 99;
+            }
 
-    //         // You can now do something like:
-    //         servo4.write(value); // Set servo position based on received value
+            // You can now do something like:
+            //servo4.write(value); // Set servo position based on received value
 
-    //     }
-    //     // delay(10);
-    // }
+        }
+        // delay(10);
+    }
 
 
     // // check if there is data available on the serial port

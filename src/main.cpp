@@ -36,20 +36,16 @@ int command_prev = 0;         // previous command received
 int command_curr = 0;         // current command received 
 bool command_change = false;  // flag to indicate if command changed
 
-// interpo start and position variables
-double interp_start_deg_servo1, interp_end_deg_servo1;
-double interp_start_deg_servo2, interp_end_deg_servo2;
-double interp_start_deg_servo3, interp_end_deg_servo3;
-double interp_start_deg_servo4, interp_end_deg_servo4;
-
 // interpolation variables
 const double T_interp = 50.0;  // [ms] time to ramp from one position to another
 double t_start, t_now;
 double alpha;
-double deg_pos_servo1;
-double deg_pos_servo2;
-double deg_pos_servo3;
-double deg_pos_servo4;
+
+// interpolation variables
+double interp_start_deg_servo1, interp_end_deg_servo1, deg_pos_servo1;
+double interp_start_deg_servo2, interp_end_deg_servo2, deg_pos_servo2;
+double interp_start_deg_servo3, interp_end_deg_servo3, deg_pos_servo3;
+double interp_start_deg_servo4, interp_end_deg_servo4, deg_pos_servo4;
 
 // LED indicator
 bool LED_STATE = false;
@@ -81,12 +77,13 @@ void setup()
     // builtinLED to indicate status
     pinMode(LED_BUILTIN, OUTPUT);
 
-    // servos go to open 
+    // servos go to open by default
     servo1.write(deg_pos_open_servo1);
     servo2.write(deg_pos_open_servo2);
     servo3.write(deg_pos_open_servo3);
     servo4.write(deg_pos_open_servo4);
 
+    // servos go to closed by default
     // servo1.write(deg_pos_lock_servo1);
     // servo2.write(deg_pos_lock_servo2);
     // servo3.write(deg_pos_lock_servo3);
@@ -111,18 +108,16 @@ void loop()
             command_curr = 1;  // arm command
         } 
         else {
-            // really bad, detach the servos. TODO: this is not working
+            // bad, detach the servos. 
+            // TODO: this is not working
             command_curr = -1;
             servo1.detach();
             servo2.detach();
             servo3.detach();
             servo4.detach();
-            // pinMode(SERVO1_PIN, INPUT);
-            // pinMode(SERVO2_PIN, INPUT);
-            // pinMode(SERVO3_PIN, INPUT);
-            // pinMode(SERVO4_PIN, INPUT);
         }
     }
+
     // see if there has been an command change
     if (command_curr != command_prev) {
         
@@ -130,40 +125,29 @@ void loop()
         command_change = true;
         command_prev = command_curr;
         
-        // record start time
-        t_start = millis();
-        
         // set interpolation targets
         if (command_curr == 0) {
-            // interp_start_deg = deg_pos_1;
-            // interp_end_deg = deg_pos_0;
 
+            // going from lcoked to opened
             interp_start_deg_servo1 = deg_pos_lock_servo1;
-            interp_end_deg_servo1 = deg_pos_open_servo1;
-
             interp_start_deg_servo2 = deg_pos_lock_servo2;
-            interp_end_deg_servo2 = deg_pos_open_servo2;
-
             interp_start_deg_servo3 = deg_pos_lock_servo3;
-            interp_end_deg_servo3 = deg_pos_open_servo3;
-
             interp_start_deg_servo4 = deg_pos_lock_servo4;
+            interp_end_deg_servo1 = deg_pos_open_servo1;
+            interp_end_deg_servo2 = deg_pos_open_servo2;
+            interp_end_deg_servo3 = deg_pos_open_servo3;
             interp_end_deg_servo4 = deg_pos_open_servo4;
         } 
         else if (command_curr == 1) {
-            // interp_start_deg = deg_pos_0;
-            // interp_end_deg = deg_pos_1;
-
+            
+            // going from opened to locked
             interp_start_deg_servo1 = deg_pos_open_servo1;
-            interp_end_deg_servo1 = deg_pos_lock_servo1;
-
             interp_start_deg_servo2 = deg_pos_open_servo2;
-            interp_end_deg_servo2 = deg_pos_lock_servo2;
-
             interp_start_deg_servo3 = deg_pos_open_servo3;
-            interp_end_deg_servo3 = deg_pos_lock_servo3;
-
             interp_start_deg_servo4 = deg_pos_open_servo4;
+            interp_end_deg_servo1 = deg_pos_lock_servo1;
+            interp_end_deg_servo2 = deg_pos_lock_servo2;
+            interp_end_deg_servo3 = deg_pos_lock_servo3;
             interp_end_deg_servo4 = deg_pos_lock_servo4;
         }
     } 
@@ -182,8 +166,6 @@ void loop()
             alpha = t_now / T_interp;
      
             // interpolate position
-            // deg_pos = (1.0 - alpha) * interp_start_deg + alpha * interp_end_deg;
-
             deg_pos_servo1 = (1.0 - alpha) * interp_start_deg_servo1 + alpha * interp_end_deg_servo1;
             deg_pos_servo2 = (1.0 - alpha) * interp_start_deg_servo2 + alpha * interp_end_deg_servo2;
             deg_pos_servo3 = (1.0 - alpha) * interp_start_deg_servo3 + alpha * interp_end_deg_servo3;
@@ -203,6 +185,7 @@ void loop()
     // no new command, keep previous command
     else {
         if (command_curr == 0) {
+
             // set LED indicator to OFF when discommand
             LED_STATE = true;
             digitalWrite(LED_BUILTIN, LOW);
@@ -214,6 +197,7 @@ void loop()
             servo4.write(deg_pos_open_servo4);
         } 
         else if (command_curr == 1) {
+
             // set LED indicator to ON when command
             LED_STATE = true;
             digitalWrite(LED_BUILTIN, LED_STATE);

@@ -1,8 +1,10 @@
 #
-#
-#    Simple Arduino sketch to control servos over Serial communication.
-#    WARNING: do not upload this sketch while actively communicating over Serial.
-#
+#  Simple script to control servos over Serial communication.
+#  WARNING: 1) Do not communicate over Serial while actively uploading to Arduino.
+#           2) Use "ls /dev/ttyACM*" to find the correct port. This is different on Windows (COM*).
+#  Servo details:
+#  - Savox SV1261MG - Mini Digital High Voltage Aluminum Case Servo 0.095/277@ 7.4V
+#  - https://www.savoxusa.com/products/sv1261mg-mini-digital-high-voltage-aluminum-case-servo-0-095-277-7-4v#technical-details
 #
 
 import serial

@@ -27,7 +27,7 @@ int main() {
     if (comm_initilized) {
 
         std::cout << "Commanded CLOSED position..." << std::endl;
-        servo_comm.command_closed_pos();
+        servo_comm.command_locked_pos();
         std::this_thread::sleep_for(std::chrono::milliseconds(int(seconds_to_wait * 1000)));
 
         std::cout << "Commanded OPENED position..." << std::endl;
@@ -35,7 +35,7 @@ int main() {
         std::this_thread::sleep_for(std::chrono::milliseconds(int(seconds_to_wait * 1000)));
 
         std::cout << "Commanded CLOSED position..." << std::endl;
-        servo_comm.command_closed_pos();
+        servo_comm.command_locked_pos();
         std::this_thread::sleep_for(std::chrono::milliseconds(int(seconds_to_wait * 1000)));
 
         std::cout << "Commanded OPENED position..." << std::endl;

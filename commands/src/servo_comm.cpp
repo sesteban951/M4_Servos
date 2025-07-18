@@ -70,7 +70,7 @@ void ServoComm::command_opened_pos() {
 }
 
 // command the servo to be in the closed positions
-void ServoComm::command_closed_pos() {
+void ServoComm::command_locked_pos() {
 
     // send the closed command to the Teensy
     std::string command;

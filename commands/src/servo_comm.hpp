@@ -24,7 +24,7 @@ class ServoComm {
 
         // send command to Teensy over serial
         void command_opened_pos();
-        void command_closed_pos();
+        void command_locked_pos();
         
     private:
 

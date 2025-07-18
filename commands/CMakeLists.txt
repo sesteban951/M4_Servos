@@ -10,4 +10,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "-O3 -pthread")
 
 # add executables
-add_executable(m4_servos src/main.cpp)
+add_executable(simple src/simple.cpp)
+add_executable(comms_example src/main.cpp src/servo_comm.cpp)

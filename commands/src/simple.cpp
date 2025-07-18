@@ -47,7 +47,7 @@ int main() {
 
     // beginning of communication loop
     while (true) {
-        std::cout << "Enter 1 (ON), 0 (OFF), or q to quit: ";
+        std::cout << "Enter 1 (LOCKED), 0 (OPENED), or q to quit: ";
         std::string input;
         std::cin >> input;
         if (input == "q") break;

@@ -2,6 +2,7 @@
     Simple script to control servos over Serial communication.
     WARNING: 1) Do not communicate over Serial while actively uploading to Arduino.
              2) Use "ls /dev/ttyACM*" to find the correct port. This is different on Windows (COM*).
+             3) Use 'sudo' for serial port access on Linux.
 
     Servo details:
     - Savox SV1261MG - Mini Digital High Voltage Aluminum Case Servo 0.095/277@ 7.4V

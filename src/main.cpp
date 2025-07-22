@@ -4,6 +4,7 @@
              2) Make sure to set the correct serial port in the parent program.
              3) You cannot open the Serial Monitor in Arduino IDE while this sketch is running
                 since it uses the same serial bus.
+             4) Use 'sudo' for serial port access on Linux.
 
     Servo details:
     - Savox SV1261MG - Mini Digital High Voltage Aluminum Case Servo 0.095/277@ 7.4V

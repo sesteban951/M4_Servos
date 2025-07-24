@@ -1,4 +1,4 @@
-#include "servo_comm.hpp"
+#include "../inc/servo_comm.hpp"
 
 // Destructor
 ServoComm::~ServoComm() {

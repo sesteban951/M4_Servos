@@ -9,8 +9,8 @@
     - https://www.savoxusa.com/products/sv1261mg-mini-digital-high-voltage-aluminum-case-servo-0-095-277-7-4v#technical-details
 */
 
-// srandard includes
-#include "servo_comm.hpp"
+// standard includes
+#include "../inc/servo_comm.hpp"
 #include <chrono>
 #include <thread>
 

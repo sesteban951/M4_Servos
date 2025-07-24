@@ -11,4 +11,4 @@ set(CMAKE_CXX_FLAGS "-O3 -pthread")
 
 # add executables
 add_executable(simple src/simple.cpp)
-add_executable(comms_example src/main.cpp src/servo_comm.cpp)
+add_executable(comms_example src/example.cpp src/servo_comm.cpp)

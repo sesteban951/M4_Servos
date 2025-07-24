@@ -16,16 +16,32 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
-#include <iostream>
 
 // main function
-int main() {
+int main(int argc, char* argv[]) {
+    
+    // Check if the user provided a device path
+    if (argc < 2) {
 
-    // open  Teensy serial port
-    int teensy_serial_port = open("/dev/ttyACM0", O_RDWR); // NOTE: (2)
-    if (teensy_serial_port < 0) {
-        std::cerr << "Failed to open Teensy serial port!\n";
+        // print error message
+        std::cerr << "Error: No serial device specified.\n";
+        std::cerr << "\tUsage:   sudo" << argv[0] << " <serial_device>\n";
+        std::cerr << "\tExample: sudo" << argv[0] << " /dev/ttyACM0\n";
         return 1;
+    }
+
+    const char* device_path = argv[1];
+    std::cout << "Attempting to open serial device: " << device_path << "\n";
+
+    // open Teensy serial port
+    int teensy_serial_port = open(device_path, O_RDWR);
+    if (teensy_serial_port < 0) {
+        std::cerr << "Failed to open Teensy serial port.\n";
+        return 1;
+    }
+    else {
+        std::cout << "Teensy serial port opened successfully.\n";
+        std::cout << "-------------------------------------------------------\n";
     }
 
     // configure serial port settings
@@ -46,7 +62,7 @@ int main() {
     // apply settings
     tcsetattr(teensy_serial_port, TCSANOW, &tty);
 
-    // beginning of communication loop
+    // communication loop
     while (true) {
         std::cout << "Enter 1 (LOCKED), 0 (OPENED), or q to quit: ";
         std::string input;

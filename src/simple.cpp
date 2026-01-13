@@ -25,8 +25,9 @@ int main(int argc, char* argv[]) {
 
         // print error message
         std::cerr << "Error: No serial device specified.\n";
-        std::cerr << "\tUsage:   sudo" << argv[0] << " <serial_device>\n";
-        std::cerr << "\tExample: sudo" << argv[0] << " /dev/ttyACM0\n";
+        std::cerr << "\tUsage:   sudo " << argv[0] << " <serial_device>\n";
+        std::cerr << "\tExample: sudo " << argv[0] << " /dev/ttyACM0\n";
+        std::cerr << "\tUse [ls /dev/ttyACM*] to find the correct port. This is different on Windows (COM*).\n";
         return 1;
     }
 
@@ -73,6 +74,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // For manually entering servo positions between 00 and 99
     // while (true) {
     //     std::cout << "Enter servo position (00–99) or q to quit: ";
     //     std::string input;

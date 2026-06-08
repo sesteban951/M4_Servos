@@ -23,38 +23,27 @@
 #define SERVO1_PIN 14
 #define SERVO2_PIN 15
 #define SERVO3_PIN 18
-#define SERVO4_PIN 19
+#define SERVO4_PIN 19    // BACKUP SERVO
 #define BAUD_RATE 9600
+
+// use the SERVO4 BACKUP, 0 = off, 1 = on.
+#define USE_BACKUP_SERVO4 0
 
 // servo objects
 Servo servo1;
 Servo servo2;
 Servo servo3;
-Servo servo4;
+#if USE_BACKUP_SERVO4
+    Servo servo4;
+#endif
 
-// LED pins
+// LOCKED and OPEN status LED pins
 // WARNING: Do not change pins this as they are permanently soldered.
 #define LED_BLUE_PIN 23
 #define LED_RED_PIN 22
 
-// command variables
-int command_prev = 0;         // previous command received
-int command_curr = 0;         // current command received 
-bool command_change = false;  // flag to indicate if command changed
-
-// interpolation variables
-const double T_interp = 50.0;  // [ms] time to ramp from one position to another
-double t_start, t_now;
-double alpha;
-
-// interpolation variables
-double interp_start_deg_servo1, interp_end_deg_servo1, deg_pos_servo1;
-double interp_start_deg_servo2, interp_end_deg_servo2, deg_pos_servo2;
-double interp_start_deg_servo3, interp_end_deg_servo3, deg_pos_servo3;
-double interp_start_deg_servo4, interp_end_deg_servo4, deg_pos_servo4;
-
-// LED indicator
-bool LED_STATE = false;
+// command variable
+int command_curr = 0;         // current command received
 
 // open positions for the servos
 const double deg_pos_open_servo1 = 20.0;
@@ -78,7 +67,9 @@ void setup()
     servo1.attach(SERVO1_PIN);
     servo2.attach(SERVO2_PIN);
     servo3.attach(SERVO3_PIN);
-    servo4.attach(SERVO4_PIN);
+    #if USE_BACKUP_SERVO4
+        servo4.attach(SERVO4_PIN);    // BACKUP
+    #endif
 
     // builtinLED to indicate status
     pinMode(LED_BLUE_PIN, OUTPUT);
@@ -88,159 +79,70 @@ void setup()
     servo1.write(deg_pos_open_servo1);
     servo2.write(deg_pos_open_servo2);
     servo3.write(deg_pos_open_servo3);
-    servo4.write(deg_pos_open_servo4);
-
-    // servos go to closed by default
-    // servo1.write(deg_pos_lock_servo1);
-    // servo2.write(deg_pos_lock_servo2);
-    // servo3.write(deg_pos_lock_servo3);
-    // servo4.write(deg_pos_lock_servo4);
+    #if USE_BACKUP_SERVO4
+        servo4.write(deg_pos_open_servo4);
+    #endif
 
     // turn on the Teensy LED to make sure Teensy is running
-    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_BLUE_PIN, HIGH);  // BLUE LED for OPEN
+    digitalWrite(LED_RED_PIN, LOW);    // RED LED for LOCKED
+    digitalWrite(LED_BUILTIN, HIGH);   // AMBER LED for Teensy is on status
 }
+
 
 void loop()
 {
-    // red: servos to locked position
-    digitalWrite(LED_RED_PIN, HIGH);
-    digitalWrite(LED_BLUE_PIN, LOW);
-    servo1.write(deg_pos_lock_servo1);
-    servo2.write(deg_pos_lock_servo2);
-    servo3.write(deg_pos_lock_servo3);
-    servo4.write(deg_pos_lock_servo4);
-    delay(1000);
+    // check if there is data available on the serial port
+    if (Serial.available()) 
+    {
 
-    // blue: servos to open position
-    digitalWrite(LED_RED_PIN, LOW);
-    digitalWrite(LED_BLUE_PIN, HIGH);
-    servo1.write(deg_pos_open_servo1);
-    servo2.write(deg_pos_open_servo2);
-    servo3.write(deg_pos_open_servo3);
-    servo4.write(deg_pos_open_servo4);
-    delay(1000);
+        // read the command from serial
+        char cmd = Serial.read();
+
+        // set the current command
+        if (cmd == '0') 
+        {
+            command_curr = 0;  // unarm command
+            digitalWrite(LED_BLUE_PIN, HIGH);
+            digitalWrite(LED_RED_PIN, LOW);
+        }
+        else if (cmd == '1') {
+            command_curr = 1;  // arm command
+            digitalWrite(LED_RED_PIN, HIGH);
+            digitalWrite(LED_BLUE_PIN, LOW);
+        }
+        else {
+            // bad, detach the servos.
+            // TODO: this is not working
+            command_curr = -1;
+            servo1.detach();
+            servo2.detach();
+            servo3.detach();
+            #if USE_BACKUP_SERVO4
+                        servo4.detach();
+            #endif
+        }
+    }
+
+    // drive servos straight to the commanded position
+    if (command_curr == 0) {
+        servo1.write(deg_pos_open_servo1);
+        servo2.write(deg_pos_open_servo2);
+        servo3.write(deg_pos_open_servo3);
+        #if USE_BACKUP_SERVO4
+                servo4.write(deg_pos_open_servo4);
+        #endif
+    }
+    else if (command_curr == 1) {
+        servo1.write(deg_pos_lock_servo1);
+        servo2.write(deg_pos_lock_servo2);
+        servo3.write(deg_pos_lock_servo3);
+        #if USE_BACKUP_SERVO4
+                servo4.write(deg_pos_lock_servo4);
+        #endif
+    }
+
+    // delay to avoid flooding the serial port
+    delay(10);
 }
-
-// void loop()
-// {
-
-//     // check if there is data available on the serial port
-//     if (Serial.available()) {       
- 
-//         // read the command from serial
-//         char cmd = Serial.read();
- 
-//         // set the current command
-//         if (cmd == '0') {
-//             command_curr = 0;  // unarm command
-//         } 
-//         else if (cmd == '1') {
-//             command_curr = 1;  // arm command
-//         } 
-//         else {
-//             // bad, detach the servos. 
-//             // TODO: this is not working
-//             command_curr = -1;
-//             servo1.detach();
-//             servo2.detach();
-//             servo3.detach();
-//             servo4.detach();
-//         }
-//     }
-
-//     // see if there has been an command change
-//     if (command_curr != command_prev) {
-        
-//         // set flag 
-//         command_change = true;
-//         command_prev = command_curr;
-        
-//         // set interpolation targets
-//         if (command_curr == 0) {
-
-//             // going from lcoked to opened
-//             interp_start_deg_servo1 = deg_pos_lock_servo1;
-//             interp_start_deg_servo2 = deg_pos_lock_servo2;
-//             interp_start_deg_servo3 = deg_pos_lock_servo3;
-//             interp_start_deg_servo4 = deg_pos_lock_servo4;
-//             interp_end_deg_servo1 = deg_pos_open_servo1;
-//             interp_end_deg_servo2 = deg_pos_open_servo2;
-//             interp_end_deg_servo3 = deg_pos_open_servo3;
-//             interp_end_deg_servo4 = deg_pos_open_servo4;
-//         } 
-//         else if (command_curr == 1) {
-            
-//             // going from opened to locked
-//             interp_start_deg_servo1 = deg_pos_open_servo1;
-//             interp_start_deg_servo2 = deg_pos_open_servo2;
-//             interp_start_deg_servo3 = deg_pos_open_servo3;
-//             interp_start_deg_servo4 = deg_pos_open_servo4;
-//             interp_end_deg_servo1 = deg_pos_lock_servo1;
-//             interp_end_deg_servo2 = deg_pos_lock_servo2;
-//             interp_end_deg_servo3 = deg_pos_lock_servo3;
-//             interp_end_deg_servo4 = deg_pos_lock_servo4;
-//         }
-//     } 
-
-//     // interpolate to new desired state
-//     if (command_change == true) {
- 
-//         // get current time
-//         t_start = millis();
-
-//         // interpolate positions
-//         while (millis() - t_start < T_interp) {
-     
-//             // compute interpolation factor
-//             t_now = millis() - t_start;
-//             alpha = t_now / T_interp;
-     
-//             // interpolate position
-//             deg_pos_servo1 = (1.0 - alpha) * interp_start_deg_servo1 + alpha * interp_end_deg_servo1;
-//             deg_pos_servo2 = (1.0 - alpha) * interp_start_deg_servo2 + alpha * interp_end_deg_servo2;
-//             deg_pos_servo3 = (1.0 - alpha) * interp_start_deg_servo3 + alpha * interp_end_deg_servo3;
-//             deg_pos_servo4 = (1.0 - alpha) * interp_start_deg_servo4 + alpha * interp_end_deg_servo4;
-     
-//             // write the position to the servo
-//             servo1.write(deg_pos_servo1);
-//             servo2.write(deg_pos_servo2);
-//             servo3.write(deg_pos_servo3);
-//             servo4.write(deg_pos_servo4);
-//         }
-
-//         // reset command change flag
-//         command_change = false;
-//     }
-
-//     // no new command, keep previous command
-//     else {
-//         if (command_curr == 0) {
-
-//             // set LED indicator to OFF when discommand
-//             LED_STATE = true;
-//             digitalWrite(LED_BUILTIN, LOW);
-     
-//             // write the position to the servo
-//             servo1.write(deg_pos_open_servo1);
-//             servo2.write(deg_pos_open_servo2);
-//             servo3.write(deg_pos_open_servo3);
-//             servo4.write(deg_pos_open_servo4);
-//         } 
-//         else if (command_curr == 1) {
-
-//             // set LED indicator to ON when command
-//             LED_STATE = true;
-//             digitalWrite(LED_BUILTIN, LED_STATE);
-     
-//             // write the position to the servo
-//             servo1.write(deg_pos_lock_servo1);
-//             servo2.write(deg_pos_lock_servo2);
-//             servo3.write(deg_pos_lock_servo3);
-//             servo4.write(deg_pos_lock_servo4);
-//         }
-//     }
-    
-//     // delay to avoid flooding the serial port
-//     delay(10);
-// }
 

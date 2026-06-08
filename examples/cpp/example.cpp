@@ -10,7 +10,7 @@
 */
 
 // standard includes
-#include "../inc/servo_comm.hpp"
+#include "servo_comm.hpp"
 #include <chrono>
 #include <thread>
 

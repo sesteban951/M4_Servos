@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=64.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "servo-backpack"
+version = "0.1.0"
+description = "Host-side servo communication library for the Teensy-Servo backpack."
+requires-python = ">=3.8"
+dependencies = [
+    "pyserial>=3.5",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["servo_comm"]

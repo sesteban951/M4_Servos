@@ -46,15 +46,15 @@ Servo servo3;
 int command_curr = 0;         // current command received
 
 // open positions for the servos
-const double deg_pos_open_servo1 = 20.0;
-const double deg_pos_open_servo2 = 35.0;
-const double deg_pos_open_servo3 = 35.0;
+const double deg_pos_open_servo1 = 135.0;
+const double deg_pos_open_servo2 = 125.0;
+const double deg_pos_open_servo3 = 120.0;
 const double deg_pos_open_servo4 = 40.0;
 
 // locked positions for the servos
-const double deg_pos_lock_servo1 = 65.0;
-const double deg_pos_lock_servo2 = 90.0;
-const double deg_pos_lock_servo3 = 99.0;
+const double deg_pos_lock_servo1 = 90.0;
+const double deg_pos_lock_servo2 = 170.0;
+const double deg_pos_lock_servo3 = 75.0;
 const double deg_pos_lock_servo4 = 99.0;
 
 
